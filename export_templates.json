@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "dataset_id": "labs_export_templates_v1",
+    "language": "es"
+  },
+  "export_templates": [
+    {
+      "template_id": "note_plaintext_v1",
+      "name": "Nota (texto plano)",
+      "format": "text/plain",
+      "body": "LABORATORIOS ({date})\nContexto: {context}\nFuente: {lab_name}\n\n{panel_blocks}\n\nAlertas/pendientes: {alerts}\n"
+    },
+    {
+      "template_id": "panel_block_v1",
+      "name": "Bloque por panel",
+      "format": "text/plain",
+      "body": "{panel_name}:\n{lines}\n"
+    },
+    {
+      "template_id": "line_v1",
+      "name": "Línea por analito",
+      "format": "text/plain",
+      "body": "- {analyte_name}: {value} {units} (VR {ref_low}-{ref_high}) [{status}]\n"
+    }
+  ]
+}
