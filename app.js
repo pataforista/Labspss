@@ -2,6 +2,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 const LS_KEY = "labnotes_records_v1";
+const LS_THEME = "labnotes_theme";
 
 const state = {
   catalog: null,
@@ -64,8 +65,21 @@ function updateConversionHint(id, val, aid) {
   hintEl.textContent = `≈ ${res.toFixed(2)} ${conv.unit}`;
 }
 
+/* ---------- theme ---------- */
+function initTheme() {
+  const saved = localStorage.getItem(LS_THEME) || "dark";
+  document.body.dataset.theme = saved;
+}
+
+function toggleTheme() {
+  const current = document.body.dataset.theme === "light" ? "dark" : "light";
+  document.body.dataset.theme = current;
+  localStorage.setItem(LS_THEME, current);
+}
+
 /* ---------- init ---------- */
 window.onload = async () => {
+  initTheme();
   state.catalog = await fetch("lab_catalog.json").then(r => r.json());
   const saved = localStorage.getItem(LS_KEY);
   state.records = saved ? JSON.parse(saved).records : [];
@@ -87,6 +101,7 @@ function initUI() {
   $("#btnCopyExport").onclick = () => navigator.clipboard.writeText($("#exportText").value);
   $("#btnReset").onclick = () => { if (confirm("¿Borrar todo?")) { state.records = []; persist(); renderDashboard(); } };
   $("#btnExportAll").onclick = exportAll;
+  $("#btnTheme").onclick = toggleTheme;
 
   $("#nrSearch").oninput = (e) => {
     state.filters.search = e.target.value.toLowerCase();
@@ -197,21 +212,23 @@ function renderCapture() {
         inputHtml = `<input id="${inputId}" type="text" placeholder="Observación">`;
       } else {
         inputHtml = `
-          <div class="${mod ? 'num-with-mod' : ''}">
-            <input id="${inputId}" type="number" step="any" 
-              oninput="updateConversionHint('${inputId}', this.value, '${an.analyte_id}')">
-            ${mod ? `<label class="tinycheck">
-              <input type="checkbox" id="mod_${pid}_${an.analyte_id}"
-                onchange="updateModDisplay(this.parentElement.previousElementSibling)">×10³
-            </label>` : ""}
-          </div>
-          <div id="hint_${inputId}" class="conversion-hint small accent"></div>`;
+          <div>
+            <div class="${mod ? 'num-with-mod' : ''}">
+              <input id="${inputId}" class="font-mono" type="number" step="any" 
+                oninput="updateConversionHint('${inputId}', this.value, '${an.analyte_id}')">
+              ${mod ? `<label class="tinycheck">
+                <input type="checkbox" id="mod_${pid}_${an.analyte_id}"
+                  onchange="updateModDisplay(this.parentElement.previousElementSibling)">×10³
+              </label>` : ""}
+            </div>
+            <div id="hint_${inputId}" class="conversion-hint font-mono"></div>
+          </div>`;
       }
 
       r.innerHTML = `
         <div>${an.name}</div>
         <div>${inputHtml}</div>
-        <div class="muted">${an.units || ""}</div>`;
+        <div class="muted small">${an.units || ""}</div>`;
       c.appendChild(r);
     });
     a.appendChild(c);
@@ -255,7 +272,13 @@ function saveNewRecord() {
   rec.eval = evaluate(rec);
   state.records.push(rec);
   persist();
-  openDetail(rec.id);
+
+  // Feedback visual
+  $("#btnSaveRecord").textContent = "Guardado...";
+  setTimeout(() => {
+    $("#btnSaveRecord").textContent = "Guardar";
+    openDetail(rec.id);
+  }, 400);
 }
 
 /* ---------- evaluation ---------- */
@@ -338,6 +361,11 @@ function openDetail(id) {
   state.selected = r;
   $("#detailHeader").innerHTML = `<strong>${r.date}</strong> · ${sanitize(r.context)}`;
 
+  // Context-aware automatic theme switch
+  if (r.med.clozapine || r.eval.alerts.some(a => a.type === 'critical')) {
+    document.body.dataset.theme = "dark";
+  }
+
   if (r.eval.alerts.length) {
     $("#detailAlerts").innerHTML = r.eval.alerts.map(a => `<div class="badge ${a.type}">${a.msg}</div>`).join("");
   } else {
@@ -364,13 +392,13 @@ function openDetail(id) {
       let v = e.value;
       if (e.modifier) v = `${e.value} ${e.modifier} (= ${e.scaled})`;
 
-      const convHtml = e.conv ? `<div class="conv-val accent small">SI: ${e.conv.val} ${e.conv.unit}</div>` : "";
+      const convHtml = e.conv ? `<div class="conv-val font-mono">SI: ${e.conv.val} ${e.conv.unit}</div>` : "";
 
       c.innerHTML += `
         <div class="analyte-row">
           <div class="analyte-grid">
             <div style="${e.isDerived ? 'font-style:italic' : ''}">${e.name}</div>
-            <div>
+            <div class="font-mono">
               <div>${v} <small>${e.units || ""}</small></div>
               ${convHtml}
             </div>

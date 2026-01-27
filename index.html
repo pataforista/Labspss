@@ -1,150 +1,156 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#111111" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <title>Lab Notes</title>
 </head>
 
 <body data-theme="zelda">
 
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-title">Lab Notes</div>
-    <div class="brand-sub">Registro clínico de laboratorio</div>
-  </div>
-  <div class="top-actions">
-    <button id="btnNew" class="btn">Nuevo</button>
-    <button id="btnTheme" class="btn btn-secondary">Tema</button>
-    <button id="btnSettings" class="btn btn-secondary">Ajustes</button>
-  </div>
-</header>
-
-<main class="container">
-
-<!-- DASHBOARD -->
-<section id="viewDashboard" class="view">
-  <div class="row">
-    <h2>Registros</h2>
-    <span class="muted">Guardado local · Offline</span>
-  </div>
-  <div class="card search-card">
-    <input type="search" id="nrSearch" placeholder="Buscar por fecha, contexto o lab..." aria-label="Buscar registros">
-  </div>
-  <div id="recordsList" class="cards"></div>
-  <div id="emptyState" class="empty hidden">No hay registros.</div>
-</section>
-
-<!-- NUEVO -->
-<section id="viewNew" class="view hidden">
-  <div class="row">
-    <h2>Nuevo registro</h2>
-    <button id="btnBackFromNew" class="btn btn-secondary">Volver</button>
-  </div>
-
-  <div class="card">
-    <div class="grid2">
-      <label>Fecha
-        <input id="nrDate" type="date" />
-      </label>
-      <label>Sexo
-        <select id="nrSex">
-          <option value="any">No aplica</option>
-          <option value="female">Femenino</option>
-          <option value="male">Masculino</option>
-        </select>
-      </label>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">Lab Notes</div>
+      <div class="brand-sub">Registro clínico de laboratorio</div>
     </div>
-
-    <label>Contexto
-      <input id="nrContext" placeholder="Ej. Control ambulatorio" />
-    </label>
-
-    <label>Laboratorio
-      <input id="nrLabName" placeholder="Ej. Lab X" />
-    </label>
-
-    <label class="checkrow">
-      <input id="nrClozapine" type="checkbox" aria-describedby="cloz-hint">
-      Paciente en clozapina
-      <span id="cloz-hint" class="sr-only">Activa monitoreo ANC</span>
-    </label>
-
-    <label class="checkrow">
-      <input id="nrBEN" type="checkbox">
-      BEN / Duffy-null (ANC 500)
-    </label>
-  </div>
-
-  <div class="card">
-    <h3>Paneles</h3>
-    <div id="nrPanels" class="panel-pills"></div>
-  </div>
-
-  <div id="nrCaptureArea"></div>
-
-  <div class="actions">
-    <button id="btnSaveRecord" class="btn btn-primary">Guardar</button>
-  </div>
-</section>
-
-<!-- DETALLE -->
-<section id="viewDetail" class="view hidden">
-  <div class="row">
-    <h2>Detalle</h2>
-    <div class="right">
-      <button id="btnExport" class="btn">Exportar</button>
-      <button id="btnBackFromDetail" class="btn btn-secondary">Volver</button>
+    <div class="top-actions">
+      <button id="btnNew" class="btn">Nuevo</button>
+      <button id="btnTheme" class="btn btn-secondary">Tema</button>
+      <button id="btnSettings" class="btn btn-secondary">Ajustes</button>
     </div>
-  </div>
+  </header>
 
-  <div id="detailHeader" class="card"></div>
+  <main class="container">
 
-  <div class="card">
-    <h3>Alertas</h3>
-    <div id="detailAlerts" class="chips"></div>
-    <div id="detailChecklists" class="checklists"></div>
-  </div>
+    <!-- DASHBOARD -->
+    <section id="viewDashboard" class="view">
+      <div class="row">
+        <h2>Registros</h2>
+        <span class="muted">Guardado local · Offline</span>
+      </div>
+      <div class="card search-card">
+        <input type="search" id="nrSearch" placeholder="Buscar por fecha, contexto o lab..."
+          aria-label="Buscar registros">
+      </div>
+      <div id="recordsList" class="cards"></div>
+      <div id="emptyState" class="empty hidden">No hay registros.</div>
+    </section>
 
-  <div id="detailPanels"></div>
-</section>
+    <!-- NUEVO -->
+    <section id="viewNew" class="view hidden">
+      <div class="row">
+        <h2>Nuevo registro</h2>
+        <button id="btnBackFromNew" class="btn btn-secondary">Volver</button>
+      </div>
 
-<!-- EXPORT -->
-<section id="viewExport" class="view hidden">
-  <div class="row">
-    <h2>Exportación</h2>
-    <div class="right">
-      <button id="btnCopyExport" class="btn btn-primary">Copiar</button>
-      <button id="btnBackFromExport" class="btn btn-secondary">Volver</button>
-    </div>
-  </div>
-  <div class="card">
-    <textarea id="exportText" rows="18"></textarea>
-  </div>
-</section>
+      <div class="card">
+        <div class="grid2">
+          <label>Fecha
+            <input id="nrDate" type="date" />
+          </label>
+          <label>Sexo
+            <select id="nrSex">
+              <option value="any">No aplica</option>
+              <option value="female">Femenino</option>
+              <option value="male">Masculino</option>
+            </select>
+          </label>
+        </div>
 
-<!-- SETTINGS -->
-<section id="viewSettings" class="view hidden">
-  <div class="row">
-    <h2>Ajustes</h2>
-    <button id="btnBackFromSettings" class="btn btn-secondary">Volver</button>
-  </div>
+        <label>Contexto
+          <input id="nrContext" placeholder="Ej. Control ambulatorio" />
+        </label>
 
-  <div class="card">
-    <button id="btnExportAll" class="btn">Exportar JSON</button>
-    <button id="btnReset" class="btn btn-danger">Borrar todo</button>
-  </div>
-</section>
+        <label>Laboratorio
+          <input id="nrLabName" placeholder="Ej. Lab X" />
+        </label>
 
-</main>
+        <label class="checkrow">
+          <input id="nrClozapine" type="checkbox" aria-describedby="cloz-hint">
+          Paciente en clozapina
+          <span id="cloz-hint" class="sr-only">Activa monitoreo ANC</span>
+        </label>
 
-<footer class="footer muted">
-  Elaborado por Dr. César Celada · No sustituye criterio clínico
-</footer>
+        <label class="checkrow">
+          <input id="nrBEN" type="checkbox">
+          BEN / Duffy-null (ANC 500)
+        </label>
+      </div>
 
-<script src="app.js"></script>
+      <div class="card">
+        <h3>Paneles</h3>
+        <div id="nrPanels" class="panel-pills"></div>
+      </div>
+
+      <div id="nrCaptureArea"></div>
+
+      <div class="actions">
+        <button id="btnSaveRecord" class="btn btn-primary">Guardar</button>
+      </div>
+    </section>
+
+    <!-- DETALLE -->
+    <section id="viewDetail" class="view hidden">
+      <div class="row">
+        <h2>Detalle</h2>
+        <div class="right">
+          <button id="btnExport" class="btn">Exportar</button>
+          <button id="btnBackFromDetail" class="btn btn-secondary">Volver</button>
+        </div>
+      </div>
+
+      <div id="detailHeader" class="card"></div>
+
+      <div class="card">
+        <h3>Alertas</h3>
+        <div id="detailAlerts" class="chips"></div>
+        <div id="detailChecklists" class="checklists"></div>
+      </div>
+
+      <div id="detailPanels"></div>
+    </section>
+
+    <!-- EXPORT -->
+    <section id="viewExport" class="view hidden">
+      <div class="row">
+        <h2>Exportación</h2>
+        <div class="right">
+          <button id="btnCopyExport" class="btn btn-primary">Copiar</button>
+          <button id="btnBackFromExport" class="btn btn-secondary">Volver</button>
+        </div>
+      </div>
+      <div class="card">
+        <textarea id="exportText" rows="18"></textarea>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="viewSettings" class="view hidden">
+      <div class="row">
+        <h2>Ajustes</h2>
+        <button id="btnBackFromSettings" class="btn btn-secondary">Volver</button>
+      </div>
+
+      <div class="card">
+        <button id="btnExportAll" class="btn">Exportar JSON</button>
+        <button id="btnReset" class="btn btn-danger">Borrar todo</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer muted">
+    Elaborado por Dr. César Celada · No sustituye criterio clínico
+  </footer>
+
+  <script src="app.js"></script>
 </body>
+
 </html>
