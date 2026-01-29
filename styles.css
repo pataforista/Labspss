@@ -1,29 +1,48 @@
 :root {
+  /* Color system */
+  --bg-900: #0b1120;
+  --bg-800: #0f172a;
+  --bg-700: #111827;
+  --text-100: #f8fafc;
+  --text-200: #e5e7eb;
+  --text-300: #cbd5f5;
+  --border-200: rgba(148, 163, 184, 0.2);
+  --border-300: rgba(148, 163, 184, 0.35);
+
+  /* Brand accent */
+  --primary-400: #7c3aed;
+  --primary-500: #6d28d9;
+  --primary-600: #5b21b6;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 180ms;
+  --duration-med: 280ms;
+  --duration-slow: 420ms;
+
+  /* Radius & Shadow */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --shadow-soft: 0 10px 30px rgba(2, 6, 23, 0.35);
+  --shadow-glow: 0 0 40px rgba(124, 58, 237, 0.2);
+
   /* DARK MODE TOKENS (Base) */
   --bg-primary: #121015;
-  /* negro ciruela */
   --bg-secondary: #1A1620;
-  /* púrpura carbón */
   --bg-panel: #201B28;
-  /* altar / placa */
   --bg-etched: #15121A;
-  /* pergamino oscuro */
 
   /* INK / TEXT */
   --ink-primary: #E8DFC8;
-  /* hueso */
   --ink-secondary: #B8AE97;
-  /* pergamino */
   --ink-muted: #7E7768;
-  /* anotación */
 
   /* RITUAL ACCENTS */
   --ritual-red: #C4455C;
-  /* sangre estilizada */
   --ritual-pink: #E27DA1;
-  /* afecto oscuro */
   --ritual-purple: #6B4E77;
-  /* misticismo suave */
 
   /* TECH / INSTRUMENTAL */
   --tech-glow: #5FA3A2;
@@ -31,9 +50,7 @@
 
   /* WARNING / RISK */
   --risk-amber: #D0A94A;
-  /* presagio */
   --risk-shadow: #3A2A2A;
-  /* peligro latente */
 
   /* MATERIAL */
   --metal-bronze: #7A5C3A;

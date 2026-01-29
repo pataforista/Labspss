@@ -7,13 +7,18 @@
   <meta name="theme-color" content="#111111" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="AnimatedList.css" />
+  <link rel="stylesheet" href="BubbleMenu.css" />
+  <link rel="stylesheet" href="ElectricBorder.css" />
+  <link rel="stylesheet" href="Galaxy.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <title>Lab Notes</title>
 </head>
 
-<body data-theme="zelda">
+<body data-theme="dark">
+  <div id="galaxyBg"></div>
 
   <header class="topbar">
     <div class="brand">
@@ -24,6 +29,7 @@
       <button id="btnNew" class="btn">Nuevo</button>
       <button id="btnTheme" class="btn btn-secondary">Tema</button>
       <button id="btnSettings" class="btn btn-secondary">Ajustes</button>
+      <button id="btnDemo" class="btn btn-secondary">Demo UI</button>
     </div>
   </header>
 
@@ -41,6 +47,27 @@
       </div>
       <div id="recordsList" class="cards"></div>
       <div id="emptyState" class="empty hidden">No hay registros.</div>
+    </section>
+
+    <!-- UI DEMO VIEW -->
+    <section id="viewDemo" class="view hidden">
+      <div class="row">
+        <h2>Demo de Componentes Premium</h2>
+        <button id="btnBackFromDemo" class="btn btn-secondary">Volver</button>
+      </div>
+
+      <div class="grid2" style="margin-top: 20px;">
+        <div id="electricCard">
+          <div class="eb-content">
+            <h3>Electric Border</h3>
+            <p>Este componente envuelve contenido con un borde animado sutil.</p>
+          </div>
+        </div>
+
+        <div id="listContainer">
+          <h3>Animated List</h3>
+        </div>
+      </div>
     </section>
 
     <!-- NUEVO -->
@@ -150,7 +177,55 @@
     Elaborado por Dr. César Celada · No sustituye criterio clínico
   </footer>
 
+  <script src="components.js"></script>
   <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Init Galaxy
+      if (document.getElementById('galaxyBg')) new Galaxy(document.getElementById('galaxyBg'));
+
+      // Init Electric Border
+      const ec = document.getElementById('electricCard');
+      if (ec) new ElectricBorder(ec, { color: '#7c3aed' });
+
+      // Init Animated List
+      const lc = document.getElementById('listContainer');
+      if (lc) {
+        new AnimatedList(lc, {
+          items: ['Prototipos', 'Design System', 'Auditoría UX', 'UI Kit', 'Landing Page'],
+          onItemSelect: (item, index) => console.log('Selected:', item, index)
+        });
+      }
+
+      // Init Bubble Menu
+      new BubbleMenu({
+        items: [
+          { label: 'Dashboard', href: '#' },
+          { label: 'Nuevo', href: '#' },
+          { label: 'Ajustes', href: '#' }
+        ]
+      });
+
+      // Demo Navigation
+      const btnDemo = document.getElementById('btnDemo');
+      const viewDemo = document.getElementById('viewDemo');
+      const btnBackFromDemo = document.getElementById('btnBackFromDemo');
+      const viewDashboard = document.getElementById('viewDashboard');
+
+      if (btnDemo && viewDemo) {
+        btnDemo.onclick = () => {
+          document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+          viewDemo.classList.remove('hidden');
+        };
+      }
+      if (btnBackFromDemo && viewDashboard) {
+        btnBackFromDemo.onclick = () => {
+          document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+          viewDashboard.classList.remove('hidden');
+        };
+      }
+    });
+  </script>
 </body>
 
 </html>
