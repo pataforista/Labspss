@@ -419,8 +419,6 @@ function openExport() {
   text += `Contexto: ${r.context || "—"}\n`;
   text += `Paciente: ${r.sex === 'male' ? 'Masculino' : r.sex === 'female' ? 'Femenino' : '—'}\n\n`;
 
-  if (r.eval.alerts.length) text += `ALERTAS:\n` + r.eval.alerts.map(a => `- ${a.msg}`).join("\n") + "\n\n";
-
   r.panels.forEach(p => {
     const panelDef = state.catalog.panels.find(x => x.panel_id === p.panel_id);
     text += `--- ${panelDef.name} ---\n`;
@@ -428,7 +426,7 @@ function openExport() {
       const v = e.modifier ? e.scaled : e.value;
       let line = `${e.name}: ${v} ${e.units || ""}`;
       if (e.conv) line += ` (${e.conv.val} ${e.conv.unit})`;
-      text += `${line} [${e.status}]\n`;
+      text += `${line}\n`;
     });
     text += `\n`;
   });
