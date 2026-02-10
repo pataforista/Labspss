@@ -372,6 +372,18 @@
           ]
         },
         {
+          "analyte_id": "urea",
+          "name": "Urea",
+          "units": "mg/dL",
+          "ref_ranges": [
+            {
+              "sex": "any",
+              "low": 15,
+              "high": 40
+            }
+          ]
+        },
+        {
           "analyte_id": "creatinine",
           "name": "Creatinina",
           "units": "mg/dL",
@@ -998,14 +1010,16 @@
             }
           ],
           "interpretation_hints": [
-            "<5.7: Normal",
-            "5.7-6.4: Prediabetes",
-            ">=6.5: Diabetes (confirmar).",
-            "Considerar factores que afecten la vida media eritrocitaria."
+            "Normal: <5.7% | Prediabetes: 5.7–6.4% | Diabetes: ≥6.5% (confirmar).",
+            "Cambio mínimo real: ~0.3–0.5% entre mediciones.",
+            "HbA1c alta con glucosas normales: sugiere picos posprandiales.",
+            "Falsamente baja: hemólisis, sangrado, transfusión, embarazo (2º-3º trim), EPO.",
+            "Falsamente alta: ferropenia, uremia avanzada, alcoholismo crónico."
           ],
           "follow_up_checklist": [
             "Si >= 6.5: repetir para confirmar o usar glucosa ayuno/CTOG.",
-            "Revisar glucemias posprandiales si HbA1c alta con ayuno normal."
+            "Revisar glucemias posprandiales si HbA1c alta con ayuno normal.",
+            "Si hay anemia severa o hemoglobinopatías: considerar fructosamina."
           ]
         },
         {
@@ -1072,15 +1086,17 @@
             }
           ],
           "interpretation_hints": [
-            "Elevada en: fármacos, estrés, hipotiroidismo, embarazo, prolactinoma.",
-            "Si leve (25-50): descartar estrés/fármacos.",
-            "Si >100: mayor sospecha de adenoma."
+            "Rangos típicos: Hombres 4–15 ng/mL | Mujeres no emb. 5–25 ng/mL.",
+            "Pulsátil: sube con estrés, coito, ejercicio, sueño. Toma ideal: matutina y reposo.",
+            "Leve (25-50): fármacos, estrés, hipotiroidismo subclínico, macroprolactina.",
+            "Moderada (50-100): antipsicóticos/antieméticos, lesión de tallo hipofisario.",
+            "Alta (>100): aumenta probabilidad de prolactinoma o fármacos potentes (risperidona)."
           ],
           "follow_up_checklist": [
-            "Descartar embarazo (hCG).",
-            "Revisar fármacos (antipsicóticos, etc.).",
-            "Pedir TSH (hipotiroidismo).",
-            "Descartar macroprolactina si asintomático."
+            "Descartar embarazo (beta-hCG) en mujeres en edad fértil.",
+            "Revisar fármacos (antipsicóticos) y función renal/hepática.",
+            "Pedir TSH/T4L: el hipotiroidismo eleva TRH y puede elevar PRL.",
+            "Descartar macroprolactina (precipitación por PEG) si síntomas discordantes."
           ]
         },
         {
@@ -1434,8 +1450,172 @@
               "high": 160
             }
           ]
+        },
+        {
+          "analyte_id": "ldh",
+          "name": "LDH",
+          "units": "U/L",
+          "ref_ranges": [
+            {
+              "sex": "any",
+              "low": 140,
+              "high": 280
+            }
+          ]
         }
       ]
+    },
+    {
+      "panel_id": "qs6",
+      "name": "Química Sanguínea 6 (QS6)",
+      "analytes_refs": [
+        "glucose_fasting",
+        "urea",
+        "bun",
+        "creatinine",
+        "uric_acid",
+        "chol_total"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "qs12",
+      "name": "Química Sanguínea 12 (QS12)",
+      "analytes_refs": [
+        "glucose_fasting",
+        "urea",
+        "bun",
+        "creatinine",
+        "uric_acid",
+        "chol_total",
+        "triglycerides",
+        "hdl",
+        "ldl",
+        "bili_total",
+        "ast",
+        "alt"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "qs24",
+      "name": "Química Sanguínea 24 (QS24)",
+      "analytes_refs": [
+        "glucose_fasting",
+        "urea",
+        "bun",
+        "creatinine",
+        "uric_acid",
+        "chol_total",
+        "triglycerides",
+        "hdl",
+        "ldl",
+        "bili_total",
+        "bili_direct",
+        "sodium",
+        "potassium",
+        "chloride",
+        "bicarb",
+        "calcium",
+        "phosphorus",
+        "magnesium",
+        "albumin",
+        "ast",
+        "alt",
+        "alp",
+        "ggt",
+        "ldh"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "checkup_basico",
+      "name": "Chequeo Básico (Preop/1er Contacto)",
+      "analytes_refs": [
+        "hb",
+        "wbc",
+        "plt",
+        "glucose_fasting",
+        "urea",
+        "creatinine",
+        "uric_acid",
+        "chol_total",
+        "urine_sg",
+        "urine_ph",
+        "protein_dip",
+        "nitrites"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "metabolico_cv",
+      "name": "Metabólico / Cardiovascular",
+      "analytes_refs": [
+        "glucose_fasting",
+        "hba1c",
+        "chol_total",
+        "triglycerides",
+        "hdl",
+        "ldl",
+        "ast",
+        "alt",
+        "tsh"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "renal_completo",
+      "name": "Panel Renal (ERC/Litio)",
+      "analytes_refs": [
+        "creatinine",
+        "bun",
+        "sodium",
+        "potassium",
+        "chloride",
+        "bicarb",
+        "urine_sg",
+        "urine_ph",
+        "protein_dip",
+        "calcium",
+        "phosphorus",
+        "magnesium"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "hepatico_completo",
+      "name": "Panel Hepático",
+      "analytes_refs": [
+        "ast",
+        "alt",
+        "alp",
+        "ggt",
+        "bili_total",
+        "bili_direct",
+        "albumin",
+        "inr"
+      ],
+      "analytes": []
+    },
+    {
+      "panel_id": "psiquiatria_psicofarmacos",
+      "name": "Psiquiatría / Psicofármacos",
+      "analytes_refs": [
+        "wbc",
+        "anc",
+        "glucose_fasting",
+        "hba1c",
+        "triglycerides",
+        "ldl",
+        "ast",
+        "alt",
+        "prolactin",
+        "creatinine",
+        "sodium",
+        "tsh",
+        "ft4"
+      ],
+      "analytes": []
     }
   ]
 }

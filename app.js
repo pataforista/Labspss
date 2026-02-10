@@ -80,7 +80,25 @@ function toggleTheme() {
 /* ---------- init ---------- */
 window.onload = async () => {
   initTheme();
-  state.catalog = await fetch("lab_catalog.json").then(r => r.json());
+  const catalog = await fetch("lab_catalog.json").then(r => r.json());
+  
+  // Resolve analytes_refs in panels
+  const allAnalytes = {};
+  catalog.panels.forEach(p => {
+    p.analytes.forEach(a => {
+      if (!allAnalytes[a.analyte_id]) allAnalytes[a.analyte_id] = a;
+    });
+  });
+
+  catalog.panels.forEach(p => {
+    if (p.analytes_refs && (!p.analytes || p.analytes.length === 0)) {
+      p.analytes = p.analytes_refs
+        .map(id => allAnalytes[id])
+        .filter(Boolean);
+    }
+  });
+
+  state.catalog = catalog;
   const saved = localStorage.getItem(LS_KEY);
   state.records = saved ? JSON.parse(saved).records : [];
   $("#nrDate").value = localISODate();
@@ -415,23 +433,36 @@ function openDetail(id) {
 /* ---------- export ---------- */
 function openExport() {
   const r = state.selected;
-  let text = `REPORTE DE LABORATORIO - ${r.date}\n`;
-  text += `Contexto: ${r.context || "—"}\n`;
-  text += `Paciente: ${r.sex === 'male' ? 'Masculino' : r.sex === 'female' ? 'Femenino' : '—'}\n\n`;
+  let text = `LABS: ${r.date} | ${r.context || "Sin contex."}\n`;
+  text += `Sex: ${r.sex === 'male' ? 'M' : r.sex === 'female' ? 'F' : '—'} | Lab: ${r.lab || "—"}\n\n`;
 
   r.panels.forEach(p => {
     const panelDef = state.catalog.panels.find(x => x.panel_id === p.panel_id);
-    text += `--- ${panelDef.name} ---\n`;
-    r.eval.panelEvals[p.panel_id].forEach(e => {
+    text += `[${panelDef.name}]\n`;
+    const evals = r.eval.panelEvals[p.panel_id];
+    
+    // Group by two per line if short names, else one per line
+    let line = "";
+    evals.forEach((e, idx) => {
       const v = e.modifier ? e.scaled : e.value;
-      let line = `${e.name}: ${v} ${e.units || ""}`;
-      if (e.conv) line += ` (${e.conv.val} ${e.conv.unit})`;
-      text += `${line}\n`;
+      const statusChar = e.status === 'high' ? '↑' : e.status === 'low' ? '↓' : e.status === 'critical' ? '‼' : '';
+      const entry = `${e.name}: ${v}${statusChar} ${e.units || ""}`;
+      
+      if (idx % 2 === 0) {
+        line = entry.padEnd(25);
+      } else {
+        text += line + entry + "\n";
+        line = "";
+      }
     });
-    text += `\n`;
+    if (line) text += line + "\n";
   });
 
-  $("#exportText").value = text;
+  if (r.eval.alerts.length) {
+    text += `\nALERTAS:\n` + r.eval.alerts.map(a => `- ${a.msg}`).join("\n") + "\n";
+  }
+
+  $("#exportText").value = text.trim();
   show("#viewExport");
 }
 
