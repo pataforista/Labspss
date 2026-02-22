@@ -1,15 +1,25 @@
-// Basic offline cache
-const CACHE_NAME = "labnotes-v0.1";
+// LabNotes PWA Service Worker v1.0
+const CACHE_NAME = "labnotes-v1.0";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./components.js",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
-  "./data/lab_catalog.json",
-  "./data/export_templates.json"
+  "./lab_catalog.json",
+  "./AnimatedList.css",
+  "./BubbleMenu.css",
+  "./ElectricBorder.css",
+  "./Galaxy.css"
+];
+
+// Network-First files (Data and Logic)
+const FRESH_ASSETS = [
+  "./app.js",
+  "./lab_catalog.json"
 ];
 
 self.addEventListener("install", (event) => {
@@ -29,21 +39,33 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req).then((res) => {
-        // Best-effort cache for GET same-origin
-        try{
-          const url = new URL(req.url);
-          if (req.method === "GET" && url.origin === location.origin) {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+  const url = new URL(event.request.url);
+  const isStatic = STATIC_ASSETS.some(asset => url.pathname.endsWith(asset.replace('./', '')));
+  const isFresh = FRESH_ASSETS.some(asset => url.pathname.endsWith(asset.replace('./', '')));
+
+  if (isFresh) {
+    // Network First
+    event.respondWith(
+      fetch(event.request)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    // Cache First
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        return cached || fetch(event.request).then(res => {
+          const copy = res.clone();
+          if (event.request.method === "GET" && url.origin === location.origin) {
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
           }
-        }catch(e){}
-        return res;
-      }).catch(() => caches.match("./index.html"));
-    })
-  );
+          return res;
+        });
+      })
+    );
+  }
 });

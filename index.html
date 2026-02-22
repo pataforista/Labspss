@@ -5,6 +5,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#111111" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline';">
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="AnimatedList.css" />
@@ -19,6 +21,12 @@
 
 <body data-theme="dark">
   <div id="galaxyBg"></div>
+
+  <!-- PWA Update Toast -->
+  <div id="pwa-toast" class="toast hidden">
+    <span>Nueva versión disponible</span>
+    <button onclick="window.location.reload()">Actualizar</button>
+  </div>
 
   <header class="topbar">
     <div class="brand">
@@ -112,7 +120,14 @@
       </div>
 
       <div class="card">
-        <h3>Paneles</h3>
+        <div class="row">
+          <h3>Estudios</h3>
+          <div class="right">
+            <button id="btnClearPanels" class="btn btn-secondary small">Limpiar</button>
+          </div>
+        </div>
+        <input type="text" id="nrPanelSearch" placeholder="🔍 Buscar estudio (ej. renal, biometría)..."
+          style="margin-bottom: 12px; height: 36px; padding: 0 12px;">
         <div id="nrPanels" class="panel-pills"></div>
       </div>
 
@@ -169,12 +184,40 @@
         <button id="btnExportAll" class="btn">Exportar JSON</button>
         <button id="btnReset" class="btn btn-danger">Borrar todo</button>
       </div>
+
+      <div class="card">
+        <h3>Acerca de esta Herramienta</h3>
+        <p><strong>Autor:</strong> Dr. César Celada</p>
+        <p><strong>Contacto:</strong> <a href="mailto:drceladapsiquiatria@gmail.com">drceladapsiquiatria@gmail.com</a>
+        </p>
+        <p class="small muted">Este proyecto es sin fines de lucro, diseñado para apoyar la práctica clínica mediante la
+          gestión eficiente de registros de laboratorio.</p>
+
+        <div style="margin-top: 20px;">
+          <a href="https://buymeacoffee.com/herramente" target="_blank" class="btn btn-coffee">
+            ☕ Donar en Buy Me a Coffee
+          </a>
+        </div>
+      </div>
+
+      <div class="card disclaimer-card">
+        <h3>Aviso Legal y Clínico</h3>
+        <p class="small">Esta herramienta es de uso informativo y de apoyo técnico. <strong>No sustituye el juicio
+            clínico del profesional de la salud.</strong></p>
+        <ul class="small">
+          <li>Los rangos de referencia son orientativos y pueden variar según el laboratorio.</li>
+          <li>Las sugerencias de seguimiento y alertas son basadas en guías generales y deben ser validadas
+            individualmente.</li>
+          <li>El autor no se hace responsable por decisiones médicas tomadas basadas exclusivamente en esta aplicación.
+          </li>
+        </ul>
+      </div>
     </section>
 
   </main>
 
   <footer class="footer muted">
-    Elaborado por Dr. César Celada · No sustituye criterio clínico
+    Dr. César Celada · 2026
   </footer>
 
   <script src="components.js"></script>
@@ -192,7 +235,7 @@
       const lc = document.getElementById('listContainer');
       if (lc) {
         new AnimatedList(lc, {
-          items: ['Prototipos', 'Design System', 'Auditoría UX', 'UI Kit', 'Landing Page'],
+          items: ['Monitoreo de Clozapina', 'Niveles de Litio', 'Perfil Tiroideo', 'Cinética de Hierro', 'Función Viral'],
           onItemSelect: (item, index) => console.log('Selected:', item, index)
         });
       }
@@ -225,6 +268,22 @@
         };
       }
     });
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('pwa-toast').classList.remove('hidden');
+              }
+            });
+          });
+        });
+      });
+    }
   </script>
 </body>
 

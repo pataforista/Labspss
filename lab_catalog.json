@@ -1466,6 +1466,91 @@
       ]
     },
     {
+      "panel_id": "psych_drug_levels",
+      "name": "Psicotrópicos: Niveles Plasmáticos",
+      "analytes": [
+        {
+          "analyte_id": "lithium",
+          "name": "Litio",
+          "units": "mEq/L",
+          "ref_ranges": [
+            {
+              "sex": "any",
+              "low": 0.6,
+              "high": 1.2
+            }
+          ],
+          "critical": [
+            {
+              "op": ">",
+              "value": 1.5,
+              "label": "toxicidad_probable"
+            },
+            {
+              "op": ">",
+              "value": 2.0,
+              "label": "toxicidad_severa_riesgo_vida"
+            }
+          ],
+          "interpretation_hints": [
+            "Rango terapéutico habitual: 0.6–1.2 mEq/L. Mantenimiento: 0.6-0.8.",
+            "Toma de muestra: 12h después de la última dosis (estado estacionario).",
+            "Terapia profiláctica puede requerir niveles menores (0.4-0.6) en adultos mayores."
+          ],
+          "follow_up_checklist": [
+            "Revisar función renal (Cr/BUN), electrolitos (Na) y TSH anualmente.",
+            "Descartar deshidratación o uso de AINEs/tiazidas/IECA si nivel alto inesperado."
+          ]
+        },
+        {
+          "analyte_id": "valproate",
+          "name": "Ácido Valproico",
+          "units": "µg/mL",
+          "ref_ranges": [
+            {
+              "sex": "any",
+              "low": 50,
+              "high": 100
+            }
+          ],
+          "flags": [
+            {
+              "op": ">",
+              "value": 150,
+              "label": "toxicidad_potencial"
+            }
+          ],
+          "interpretation_hints": [
+            "Rango terapéutico: 50–100 µg/mL (hasta 125 µg/mL en manía aguda).",
+            "Toxicidad severa suele aparecer con niveles >175 µg/mL."
+          ],
+          "follow_up_checklist": [
+            "PFH y BH (plaquetas) periódicas.",
+            "Si síntomas de encefalopatía: pedir amonio plasmático."
+          ]
+        },
+        {
+          "analyte_id": "carbamazepine",
+          "name": "Carbamazepina",
+          "units": "µg/mL",
+          "ref_ranges": [
+            {
+              "sex": "any",
+              "low": 4,
+              "high": 12
+            }
+          ],
+          "interpretation_hints": [
+            "Rango terapéutico: 4–12 µg/mL.",
+            "Autoinducción enzimática: los niveles pueden bajar tras las primeras semanas."
+          ],
+          "follow_up_checklist": [
+            "BH (riesgo leucopenia/anemia aplásica) y Na (siADH)."
+          ]
+        }
+      ]
+    },
+    {
       "panel_id": "qs6",
       "name": "Química Sanguínea 6 (QS6)",
       "analytes_refs": [

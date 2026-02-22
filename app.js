@@ -53,7 +53,7 @@ function updateModDisplay(el) {
 }
 
 function updateConversionHint(id, val, aid) {
-  const hintEl = $(`#hint_${id}`);
+  const hintEl = $(`#hint_${id.replace(/\./g, '\\.')}`);
   if (!hintEl || !CONVERSIONS[aid]) return;
   const num = Number(val);
   if (!val || isNaN(num)) {
@@ -81,7 +81,7 @@ function toggleTheme() {
 window.onload = async () => {
   initTheme();
   const catalog = await fetch("lab_catalog.json").then(r => r.json());
-  
+
   // Resolve analytes_refs in panels
   const allAnalytes = {};
   catalog.panels.forEach(p => {
@@ -121,15 +121,24 @@ function initUI() {
   $("#btnExportAll").onclick = exportAll;
   $("#btnTheme").onclick = toggleTheme;
 
-  $("#nrSearch").oninput = (e) => {
-    state.filters.search = e.target.value.toLowerCase();
-    renderDashboard();
+  $("#nrPanelSearch").oninput = (e) => renderPanelSelection(e.target.value.toLowerCase());
+  $("#btnClearPanels").onclick = () => {
+    state.new.selectedPanels.clear();
+    $$(".pill").forEach(p => p.classList.remove("active"));
+    renderCapture();
+    renderPanelSelection();
   };
 
+  renderPanelSelection();
+}
+
+function renderPanelSelection(filter = "") {
   const p = $("#nrPanels");
+  p.innerHTML = "";
   state.catalog.panels.forEach(panel => {
+    if (filter && !panel.name.toLowerCase().includes(filter)) return;
     const b = document.createElement("button");
-    b.className = "pill";
+    b.className = "pill" + (state.new.selectedPanels.has(panel.panel_id) ? " active" : "");
     b.textContent = panel.name;
     b.onclick = () => {
       state.new.selectedPanels.has(panel.panel_id)
@@ -197,7 +206,8 @@ function deleteRecord(id) {
 /* ---------- new ---------- */
 function openNew() {
   state.new.selectedPanels.clear();
-  $$(".pill").forEach(p => p.classList.remove("active"));
+  $("#nrPanelSearch").value = "";
+  renderPanelSelection();
   renderCapture();
   show("#viewNew");
 }
@@ -205,18 +215,25 @@ function openNew() {
 function renderCapture() {
   const a = $("#nrCaptureArea");
   a.innerHTML = "";
+  const rendered = new Set();
+
   state.new.selectedPanels.forEach(pid => {
     const p = state.catalog.panels.find(x => x.panel_id === pid);
+    const analytesToRender = p.analytes.filter(an => !rendered.has(an.analyte_id));
+    if (analytesToRender.length === 0) return;
+
     const c = document.createElement("div");
     c.className = "card";
     c.innerHTML = `<h3>${p.name}</h3>`;
-    p.analytes.forEach(an => {
-      const mod = pid === "cbc" && ["wbc", "anc", "alc", "plt"].includes(an.analyte_id);
+
+    analytesToRender.forEach(an => {
+      rendered.add(an.analyte_id);
+      const mod = ["wbc", "anc", "alc", "plt"].includes(an.analyte_id);
       const r = document.createElement("div");
       r.className = "analyte-grid";
 
       let inputHtml = "";
-      const inputId = `in_${pid}_${an.analyte_id}`;
+      const inputId = `in_${an.analyte_id}`;
 
       if (an.units === "qual") {
         inputHtml = `
@@ -235,11 +252,11 @@ function renderCapture() {
               <input id="${inputId}" class="font-mono" type="number" step="any" 
                 oninput="updateConversionHint('${inputId}', this.value, '${an.analyte_id}')">
               ${mod ? `<label class="tinycheck">
-                <input type="checkbox" id="mod_${pid}_${an.analyte_id}"
+                <input type="checkbox" id="mod_${an.analyte_id}"
                   onchange="updateModDisplay(this.parentElement.previousElementSibling)">×10³
               </label>` : ""}
             </div>
-            <div id="hint_${inputId}" class="conversion-hint font-mono"></div>
+            <div id="hint_${inputId.replace(/\./g, '\\.')}" class="conversion-hint font-mono"></div>
           </div>`;
       }
 
@@ -261,7 +278,8 @@ function saveNewRecord() {
   state.new.selectedPanels.forEach(pid => {
     const res = [];
     state.catalog.panels.find(p => p.panel_id === pid).analytes.forEach(a => {
-      const el = $(`#in_${pid}_${a.analyte_id}`);
+      const el = $(`#in_${a.analyte_id}`);
+      if (!el) return;
       const v = el.value;
       if (v !== "") {
         if (a.units === "qual" || a.units === "text") {
@@ -269,7 +287,7 @@ function saveNewRecord() {
         } else {
           const numV = Number(v);
           if (numV < 0 && !["urine_ph"].includes(a.analyte_id)) return;
-          const m = $(`#mod_${pid}_${a.analyte_id}`)?.checked ? "x10^3" : null;
+          const m = $(`#mod_${a.analyte_id}`)?.checked ? "x10^3" : null;
           res.push({ analyte_id: a.analyte_id, value: numV, modifier: m });
         }
       }
@@ -304,6 +322,7 @@ function evaluate(rec) {
   const alerts = [];
   const panelEvals = {};
   const allAnalytes = {};
+  const alertedAnalytes = new Set();
 
   rec.panels.forEach(p => {
     const panelDef = state.catalog.panels.find(x => x.panel_id === p.panel_id);
@@ -316,12 +335,26 @@ function evaluate(rec) {
 
       if (a.critical && typeof v === 'number') {
         const crit = a.critical.find(c => (c.op === "<" && v < c.value) || (c.op === ">" && v > c.value));
-        if (crit) { status = "critical"; statusLabel = crit.label; alerts.push({ type: 'critical', msg: `${a.name}: CRÍTICO (${v} ${a.units})` }); }
+        if (crit) {
+          status = "critical";
+          statusLabel = crit.label;
+          if (!alertedAnalytes.has(r.analyte_id)) {
+            alerts.push({ type: 'critical', msg: `${a.name}: CRÍTICO (${v} ${a.units})` });
+            alertedAnalytes.add(r.analyte_id);
+          }
+        }
       }
 
       if (status !== 'critical' && a.flags && typeof v === 'number') {
         const flag = a.flags.find(f => (f.op === "<" && v < f.value) || (f.op === "<=" && v <= f.value) || (f.op === ">" && v > f.value) || (f.op === ">=" && v >= f.value));
-        if (flag) { status = "warn"; statusLabel = flag.label; alerts.push({ type: 'warn', msg: `${a.name}: ${flag.label.replace(/_/g, ' ')}` }); }
+        if (flag) {
+          status = "warn";
+          statusLabel = flag.label;
+          if (!alertedAnalytes.has(r.analyte_id)) {
+            alerts.push({ type: 'warn', msg: `${a.name}: ${flag.label.replace(/_/g, ' ')}` });
+            alertedAnalytes.add(r.analyte_id);
+          }
+        }
       }
 
       if (status === "normal" && a.ref_ranges) {
@@ -385,7 +418,7 @@ function openDetail(id) {
   }
 
   if (r.eval.alerts.length) {
-    $("#detailAlerts").innerHTML = r.eval.alerts.map(a => `<div class="badge ${a.type}">${a.msg}</div>`).join("");
+    $("#detailAlerts").innerHTML = r.eval.alerts.map(a => `<div class="badge ${a.type}">${sanitize(a.msg)}</div>`).join("");
   } else {
     $("#detailAlerts").innerHTML = `<span class="badge ok">Resultados sin alertas críticas</span>`;
   }
@@ -395,7 +428,7 @@ function openDetail(id) {
 
   if (checklists.length) {
     $("#detailChecklists").innerHTML = `<h3>Seguimiento sugerido</h3>` + checklists.map(c =>
-      `<div class="card" style="font-size:0.9em"><strong>${c.name}:</strong><ul style="margin:5px 0; padding-left:20px;">${c.items.map(i => `<li>${i}</li>`).join("")}</ul></div>`
+      `<div class="card" style="font-size:0.9em"><strong>${sanitize(c.name)}:</strong><ul style="margin:5px 0; padding-left:20px;">${c.items.map(i => `<li>${sanitize(i)}</li>`).join("")}</ul></div>`
     ).join("");
   } else { $("#detailChecklists").innerHTML = ""; }
 
@@ -405,19 +438,19 @@ function openDetail(id) {
     const panelDef = state.catalog.panels.find(x => x.panel_id === p.panel_id);
     const c = document.createElement("div");
     c.className = "card";
-    c.innerHTML = `<h3>${panelDef.name}</h3>`;
+    c.innerHTML = `<h3>${sanitize(panelDef.name)}</h3>`;
     r.eval.panelEvals[p.panel_id].forEach(e => {
       let v = e.value;
       if (e.modifier) v = `${e.value} ${e.modifier} (= ${e.scaled})`;
 
-      const convHtml = e.conv ? `<div class="conv-val font-mono">SI: ${e.conv.val} ${e.conv.unit}</div>` : "";
+      const convHtml = e.conv ? `<div class="conv-val font-mono">SI: ${sanitize(e.conv.val)} ${sanitize(e.conv.unit)}</div>` : "";
 
       c.innerHTML += `
         <div class="analyte-row">
           <div class="analyte-grid">
-            <div style="${e.isDerived ? 'font-style:italic' : ''}">${e.name}</div>
+            <div style="${e.isDerived ? 'font-style:italic' : ''}">${sanitize(e.name)}</div>
             <div class="font-mono">
-              <div>${v} <small>${e.units || ""}</small></div>
+              <div>${sanitize(v.toString())} <small>${sanitize(e.units || "")}</small></div>
               ${convHtml}
             </div>
             <div><span class="badge ${e.status}">${e.statusLabel || e.status}</span></div>
@@ -433,33 +466,39 @@ function openDetail(id) {
 /* ---------- export ---------- */
 function openExport() {
   const r = state.selected;
-  let text = `LABS: ${r.date} | ${r.context || "Sin contex."}\n`;
-  text += `Sex: ${r.sex === 'male' ? 'M' : r.sex === 'female' ? 'F' : '—'} | Lab: ${r.lab || "—"}\n\n`;
+  let text = `LABS: ${r.date} | ${r.context || "Sin contexto"}\n`;
+  const sexLabel = r.sex === 'male' ? 'M' : r.sex === 'female' ? 'F' : '—';
+  text += `Sex: ${sexLabel} | Lab: ${r.lab || "—"}\n\n`;
 
-  r.panels.forEach(p => {
-    const panelDef = state.catalog.panels.find(x => x.panel_id === p.panel_id);
-    text += `[${panelDef.name}]\n`;
-    const evals = r.eval.panelEvals[p.panel_id];
-    
-    // Group by two per line if short names, else one per line
-    let line = "";
-    evals.forEach((e, idx) => {
-      const v = e.modifier ? e.scaled : e.value;
-      const statusChar = e.status === 'high' ? '↑' : e.status === 'low' ? '↓' : e.status === 'critical' ? '‼' : '';
-      const entry = `${e.name}: ${v}${statusChar} ${e.units || ""}`;
-      
-      if (idx % 2 === 0) {
-        line = entry.padEnd(25);
-      } else {
-        text += line + entry + "\n";
-        line = "";
-      }
-    });
-    if (line) text += line + "\n";
+  const abnormal = [];
+  const normal = [];
+
+  Object.values(r.eval.panelEvals).flat().forEach(e => {
+    if (e.isDerived) return; // Skip derived for compact note unless critical?
+    const v = e.modifier ? e.scaled : e.value;
+    const statusChar = e.status === 'high' ? '↑' : e.status === 'low' ? '↓' : e.status === 'critical' ? '‼' : '';
+    if (statusChar) {
+      abnormal.push(`${e.name}: ${v}${statusChar}`);
+    } else {
+      normal.push(e.name);
+    }
   });
 
+  if (abnormal.length) {
+    text += `ALTERA.: ${abnormal.join(", ")}\n`;
+  }
+  if (normal.length) {
+    text += `NORMAL: ${normal.join(", ")}\n`;
+  }
+
+  // Derived metrics if abnormal
+  const derivedAbnormal = Object.values(r.eval.panelEvals).flat().filter(e => e.isDerived && e.status !== 'normal');
+  if (derivedAbnormal.length) {
+    text += `METRICAS: ${derivedAbnormal.map(e => `${e.name}: ${e.value}${e.status === 'high' ? '↑' : '↓'}`).join(", ")}\n`;
+  }
+
   if (r.eval.alerts.length) {
-    text += `\nALERTAS:\n` + r.eval.alerts.map(a => `- ${a.msg}`).join("\n") + "\n";
+    text += `\nALERTAS: ${r.eval.alerts.map(a => a.msg).join(" | ")}\n`;
   }
 
   $("#exportText").value = text.trim();

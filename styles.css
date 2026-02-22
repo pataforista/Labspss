@@ -376,3 +376,93 @@ input:focus {
     grid-template-areas: "name status" "input input";
   }
 }
+
+/* New Component Styles */
+.btn-coffee {
+  background: #FFDD00;
+  color: #000000;
+  font-weight: 700;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.btn-coffee:hover {
+  background: #ffea5c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 221, 0, 0.3);
+}
+
+.btn-coffee.btn:hover,
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn,
+.pill,
+.card-item {
+  touch-action: manipulation;
+}
+
+/* --- Toast --- */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card-bg);
+  border: 1px solid var(--accent);
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 2000;
+  animation: slideUp 0.3s ease;
+}
+
+.toast.hidden {
+  display: none;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.disclaimer-card {
+  border-left: 4px solid var(--ritual-red);
+  background: rgba(196, 69, 92, 0.05);
+}
+
+.disclaimer-card h3 {
+  color: var(--ritual-red);
+}
+
+.footer a,
+.card a {
+  color: var(--ritual-pink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-slow);
+}
+
+.footer a:hover,
+.card a:hover {
+  border-bottom-color: var(--ritual-pink);
+}
+
+.footer div {
+  margin-bottom: 4px;
+}
